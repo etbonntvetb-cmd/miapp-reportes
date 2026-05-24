@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dialpa Fibra</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0f2d6b; --blue2: #1a4aad; --accent: #00c6a2; --accent2: #00e6bc;
+    --red: #e63946; --bg: #f0f4fb; --card: #ffffff; --text: #1a2340;
+    --muted: #6b7a9e; --border: #d8e2f0; --shadow: 0 4px 20px rgba(15,45,107,0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); font-family: 'Nunito', sans-serif; color: var(--text); min-height: 100vh; }
+  .app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+
+  .header { background: linear-gradient(135deg, var(--blue) 0%, var(--blue2) 100%); padding: 18px 20px 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 3px 15px rgba(15,45,107,0.25); position: sticky; top: 0; z-index: 100; }
+  .header-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; color: white; flex-shrink: 0; }
+  .header-title { font-family: 'Rajdhani', sans-serif; font-size: 18px; font-weight: 700; color: white; letter-spacing: 1px; line-height: 1.1; }
+  .header-sub { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 600; }
+  .header-user { margin-left: auto; background: rgba(255,255,255,0.12); border-radius: 20px; padding: 6px 12px; font-size: 12px; color: white; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); display: none; white-space: nowrap; }
+
+  .screen { display: none; flex: 1; padding: 20px 16px 100px; overflow-y: auto; }
+  .screen.active { display: block; }
+
+  .login-hero { text-align: center; padding: 30px 0 25px; }
+  .login-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--blue), var(--blue2)); border-radius: 24px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 8px 25px rgba(15,45,107,0.3); }
+  .login-title { font-family: 'Rajdhani', sans-serif; font-size: 26px; font-weight: 700; color: var(--blue); }
+  .login-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .card { background: var(--card); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); margin-bottom: 14px; }
+  .card-title { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; }
+
+  .field { margin-bottom: 14px; }
+  .field label { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; display: block; margin-bottom: 7px; }
+  .field input, .field select { width: 100%; padding: 13px 14px; border: 2px solid var(--border); border-radius: 12px; font-size: 14px; font-family: 'Nunito', sans-serif; color: var(--text); background: #fff; outline: none; transition: all 0.2s; }
+  .field input:focus, .field select:focus { border-color: var(--blue2); box-shadow: 0 0 0 3px rgba(26,74,173,0.1); }
+
+  .cats { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+  .cat-btn { padding: 10px 4px; border: 2px solid var(--border); border-radius: 12px; background: #f8faff; font-size: 9.5px; font-weight: 800; color: var(--muted); cursor: pointer; text-align: center; line-height: 1.4; transition: all 0.2s; font-family: 'Nunito', sans-serif; }
+  .cat-btn.active { border-color: var(--blue2); background: #e8f0fd; color: var(--blue2); }
+  .cat-btn .cat-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+
+  .search-wrap { position: relative; margin-bottom: 10px; }
+  .search-wrap input { padding-left: 40px; }
+  .search-wrap::before { content: "🔍"; position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; z-index: 1; }
+
+  .act-list { border: 2px solid var(--border); border-radius: 12px; max-height: 210px; overflow-y: auto; background: #fff; }
+  .act-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid #f0f4fb; cursor: pointer; font-size: 12.5px; color: var(--text); transition: background 0.15s; }
+  .act-item:last-child { border-bottom: none; }
+  .act-item:hover, .act-item.sel { background: #e8f0fd; color: var(--blue2); }
+  .act-item input[type=radio] { accent-color: var(--blue2); width: 16px; height: 16px; flex-shrink: 0; }
+  .act-prices { margin-left: auto; text-align: right; flex-shrink: 0; }
+  .act-prices .p-main { font-weight: 800; font-size: 12px; color: var(--accent); }
+  .act-prices .p-hint { font-size: 9px; color: var(--muted); }
+
+  .price-info { background: #f0f4fb; border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: var(--muted); display: none; }
+  .price-info.show { display: block; }
+  .price-info b { color: var(--blue2); }
+
+  .btn { width: 100%; padding: 15px; border: none; border-radius: 14px; font-size: 15px; font-weight: 800; font-family: 'Nunito', sans-serif; cursor: pointer; transition: all 0.2s; letter-spacing: 0.3px; }
+  .btn-primary { background: linear-gradient(135deg, var(--blue), var(--blue2)); color: white; box-shadow: 0 4px 15px rgba(15,45,107,0.3); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-success { background: linear-gradient(135deg, #00a882, var(--accent)); color: white; box-shadow: 0 4px 15px rgba(0,198,162,0.3); }
+  .btn-danger { background: #fff0f0; color: var(--red); border: 2px solid #ffd0d0; }
+  .btn-gray { background: #f0f4fb; color: var(--muted); margin-top: 8px; }
+  .btn-sheets { background: linear-gradient(135deg, #1e7e34, #28a745); color: white; box-shadow: 0 4px 15px rgba(40,167,69,0.3); margin-top: 8px; }
+
+  .alert { padding: 12px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 14px; display: none; }
+  .alert-error { background: #fff0f0; color: #c0392b; border-left: 4px solid var(--red); }
+  .alert-success { background: #e6fdf8; color: #007a60; border-left: 4px solid var(--accent); }
+
+  .summary-card { background: linear-gradient(135deg, var(--blue) 0%, var(--blue2) 100%); border-radius: 18px; padding: 20px; color: white; margin-bottom: 14px; box-shadow: 0 6px 25px rgba(15,45,107,0.25); }
+  .summary-card .sc-label { font-size: 11px; opacity: 0.7; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+  .summary-card .sc-value { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; line-height: 1; margin: 4px 0 2px; }
+  .summary-card .sc-sub { font-size: 12px; opacity: 0.8; }
+  .sc-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.12); font-size: 13px; }
+  .sc-row:last-child { border-bottom: none; }
+  .sc-row .val { font-weight: 800; font-size: 14px; }
+  .sc-total { border-top: 2px dashed rgba(255,255,255,0.3) !important; margin-top: 6px; padding-top: 12px !important; }
+  .sc-total .val { color: var(--accent2); font-size: 17px !important; }
+
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat-pill { background: var(--card); border-radius: 14px; padding: 14px; box-shadow: var(--shadow); text-align: center; }
+  .stat-pill .sp-num { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: var(--blue2); line-height: 1; }
+  .stat-pill .sp-label { font-size: 10px; color: var(--muted); font-weight: 700; margin-top: 3px; }
+
+  .orders-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .orders-table th { background: #f0f4fb; color: var(--muted); font-weight: 800; padding: 9px 8px; text-align: left; font-size: 11px; text-transform: uppercase; }
+  .orders-table td { padding: 10px 8px; border-bottom: 1px solid #f0f4fb; color: var(--text); }
+  .orders-table tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+  .badge-green { background: #e6fdf8; color: #007a60; }
+  .badge-blue { background: #e8f0fd; color: var(--blue2); }
+
+  .reporte-box { background: #1a2340; color: #00e6bc; font-family: 'Courier New', monospace; font-size: 10.5px; padding: 16px; border-radius: 12px; white-space: pre; overflow-x: auto; margin-top: 10px; line-height: 1.85; }
+
+  .sheets-config { background: #f0fff4; border: 2px solid #b2f2d0; border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+  .sheets-config .sc-title { font-size: 12px; font-weight: 800; color: #1e7e34; margin-bottom: 10px; }
+  .sheets-status { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: 8px; margin-top: 8px; }
+  .sheets-status.ok { background: #e6fdf8; color: #007a60; }
+  .sheets-status.no { background: #fff0f0; color: #c0392b; }
+
+  .nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; height: 70px; background: white; border-top: 1px solid var(--border); display: none; justify-content: space-around; align-items: center; z-index: 200; box-shadow: 0 -4px 20px rgba(15,45,107,0.08); }
+  .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 8px; color: var(--muted); transition: color 0.2s; font-size: 11px; font-weight: 700; }
+  .nav-item.active { color: var(--blue2); }
+  .nav-item .ni { font-size: 22px; }
+  .nav-dot { width: 5px; height: 5px; background: var(--blue2); border-radius: 50%; margin-top: 1px; display: none; }
+  .nav-item.active .nav-dot { display: block; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-logo">D</div>
+    <div>
+      <div class="header-title">DIALPA FIBRA</div>
+      <div class="header-sub">Sistema de Instalaciones</div>
+    </div>
+    <div class="header-user" id="headerUser" onclick="cerrarSesion()">👤 <span id="headerName"></span> ✕</div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="screen active" id="screenLogin">
+    <div class="login-hero">
+      <div class="login-icon">📡</div>
+      <div class="login-title">Bienvenido</div>
+      <div class="login-sub">Ingresa tu cédula para continuar</div>
+    </div>
+    <div class="alert alert-error" id="loginError">❌ Cédula no registrada en el sistema.</div>
+    <div class="card">
+      <div class="field">
+        <label>Número de Cédula (CC)</label>
+        <input type="number" id="loginCC" placeholder="Ej: 80493258" onkeydown="if(event.key==='Enter') handleLogin()">
+      </div>
+      <button class="btn btn-primary" onclick="handleLogin()">Ingresar al Sistema</button>
+    </div>
+  </div>
+
+  <!-- REGISTRO -->
+  <div class="screen" id="screenForm">
+    <div class="alert alert-error" id="errorMDM">❌ Este MDM ya fue registrado anteriormente.</div>
+    <div class="alert alert-success" id="successMsg">✅ ¡Instalación registrada!</div>
+    <div class="alert alert-success" id="sheetsMsg">📊 ¡Enviado a Google Sheets!</div>
+
+    <div class="card">
+      <div class="card-title">Nueva Instalación</div>
+      <div class="field">
+        <label>Código MDM Fibra</label>
+        <input type="number" id="mdmInput" placeholder="Ej: 350001049885">
+      </div>
+      <div class="field">
+        <label>Tipo de Orden</label>
+        <div class="cats">
+          <button class="cat-btn active" data-cat="single-duo" onclick="selCat('single-duo')">
+            <span class="cat-icon">📶</span>SINGLE/<br>DUO
+          </button>
+          <button class="cat-btn" data-cat="trio-1-2" onclick="selCat('trio-1-2')">
+            <span class="cat-icon">📺</span>TRIO<br>1/2 STB
+          </button>
+          <button class="cat-btn" data-cat="trio-3-4" onclick="selCat('trio-3-4')">
+            <span class="cat-icon">🖥️</span>TRIO<br>3/4 STB
+          </button>
+          <button class="cat-btn" data-cat="trio-5-6" onclick="selCat('trio-5-6')">
+            <span class="cat-icon">📡</span>TRIO<br>5/6 STB
+          </button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Buscar Actividad</label>
+        <div class="search-wrap">
+          <input type="text" id="buscarAct" onkeyup="filtrarActs()" placeholder="Escribe para filtrar...">
+        </div>
+        <div class="act-list" id="listaActs"></div>
+      </div>
+      <div class="price-info" id="priceInfo"></div>
+      <button class="btn btn-primary" style="margin-top:4px" onclick="guardarOrden()">➕ Registrar Instalación</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Órdenes del Periodo</div>
+      <table class="orders-table">
+        <thead><tr><th>MDM</th><th>Actividad</th><th>Valor</th></tr></thead>
+        <tbody id="tablaOrdenes"></tbody>
+      </table>
+      <div id="emptyOrders" style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Sin órdenes registradas aún</div>
+    </div>
+  </div>
+
+  <!-- QUINCENA -->
+  <div class="screen" id="screenSalary">
+    <div class="field" style="margin-bottom:14px;">
+      <label>Periodo de Cobro</label>
+      <select id="selectCorte" onchange="calcSalary()">
+        <option value="1">1ra Quincena (Días 1 al 15)</option>
+        <option value="2" selected>2da Quincena (Días 16 al 31)</option>
+      </select>
+    </div>
+
+    <div class="summary-card">
+      <div class="sc-label">Total a Cobrar</div>
+      <div class="sc-value" id="lblNeto">$0 COP</div>
+      <div class="sc-sub" id="lblPeriodoDesc">Quincena actual</div>
+      <div style="margin-top:16px">
+        <div class="sc-row"><span>Órdenes en el periodo</span><span class="val" id="lblCantidad">0</span></div>
+        <div class="sc-row"><span>Valor bruto liquidado</span><span class="val" id="lblBruto">$0</span></div>
+        <div class="sc-row" style="color:rgba(255,150,150,0.95)"><span>⚠️ Retención garantía (5%)</span><span class="val" id="lblRetencion">-$0</span></div>
+        <div class="sc-row sc-total"><span>✅ NETO A COBRAR</span><span class="val" id="lblNeto2">$0</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="background:#fffbeb;border:2px solid #fde68a;">
+      <div style="font-size:12px;color:#92400e;font-weight:700;margin-bottom:8px;">ℹ️ Cómo se calcula el precio</div>
+      <div style="font-size:12px;color:#78350f;line-height:1.6">
+        El valor por instalación depende de cuántas órdenes del <b>mismo tipo</b> tengas en la quincena:<br>
+        • <b>1 a 2 órdenes</b> → precio columna 1<br>
+        • <b>3 órdenes</b> → precio columna 2<br>
+        • <b>4 o más</b> → precio columna 3<br>
+        El 5% se descuenta <b>una sola vez</b> al total de la quincena.
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-pill"><div class="sp-num" id="resSingle">0</div><div class="sp-label">Single / Duo</div></div>
+      <div class="stat-pill"><div class="sp-num" id="resTrio12">0</div><div class="sp-label">Trio 1/2 STB</div></div>
+      <div class="stat-pill"><div class="sp-num" id="resTrio34">0</div><div class="sp-label">Trio 3/4 STB</div></div>
+      <div class="stat-pill"><div class="sp-num" id="resTrio56">0</div><div class="sp-label">Trio 5/6 STB</div></div>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="font-size:13px;color:var(--muted);font-weight:700;">Total del mes: </span>
+      <span id="resTotalMes" style="font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:var(--blue2);">0</span>
+      <span style="font-size:13px;color:var(--muted);font-weight:700;"> instalaciones</span>
+    </div>
+
+    <!-- GOOGLE SHEETS CONFIG -->
+    <div class="card">
+      <div class="card-title">📊 Envío a Google Sheets</div>
+      <div class="sheets-config">
+        <div class="sc-title">🔗 URL de tu Apps Script</div>
+        <div class="field" style="margin-bottom:8px;">
+          <input type="text" id="appsScriptUrl" placeholder="Pega aquí tu URL de Apps Script..." style="font-size:12px;" oninput="guardarUrl()">
+        </div>
+        <div id="urlStatus" class="sheets-status no">⚠️ Sin configurar — los datos solo se guardan localmente</div>
+      </div>
+      <button class="btn btn-sheets" onclick="enviarQuincenaSheets()">📤 Enviar Reporte de Quincena a Sheets</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📤 Reporte para WhatsApp</div>
+      <button class="btn btn-success" id="btnCopiar" onclick="copiarReporte()">📋 Generar y Copiar Reporte</button>
+      <div id="reporteBox" style="display:none">
+        <div class="reporte-box" id="textoReporte"></div>
+        <button class="btn btn-gray" onclick="copiarReporte()">🔁 Copiar de nuevo</button>
+      </div>
+    </div>
+
+    <button class="btn btn-danger" style="margin-top:6px" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+  </div>
+
+  <div class="nav" id="navBar">
+    <div class="nav-item active" id="navReg" onclick="goto('screenForm','navReg')">
+      <span class="ni">📝</span>Registro<div class="nav-dot"></div>
+    </div>
+    <div class="nav-item" id="navSal" onclick="goto('screenSalary','navSal')">
+      <span class="ni">💵</span>Mi Quincena<div class="nav-dot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATOS DE TÉCNICOS
+// ══════════════════════════════════════════════
+const TECNICOS = {
+  "80493258": "Yoban",
+  "80842485": "Román Suta Castro",
+  "1006094077": "Alexander Caballero"
+};
+
+// ══════════════════════════════════════════════
+// TABLA COMPLETA DE ACTIVIDADES CON 3 PRECIOS
+// p12 = 1 a 2 órdenes | p3 = 3 órdenes | p4 = 4 o más
+// Fuente: Liquidación Ordenes Quincenales Dialpa
+// ══════════════════════════════════════════════
+const ACTIVIDADES = [
+  // ── SINGLE / DUO ──
+  { id:"1",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT",                                          p12:37000,  p3:43000,  p4:47000  },
+  { id:"2",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 1 AP",                                 p12:45000,  p3:50000,  p4:55000  },
+  { id:"3",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 1 AP con 1 PUNTO DE RED",              p12:47000,  p3:53000,  p4:57000  },
+  { id:"4",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 1 AP con 2 PUNTOS DE RED",             p12:48000,  p3:55000,  p4:60000  },
+  { id:"5",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 1 PUNTO DE RED",                       p12:37000,  p3:43000,  p4:47000  },
+  { id:"6",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 2 AP",                                 p12:50000,  p3:56000,  p4:61000  },
+  { id:"7",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 2 AP con 1 PUNTO DE RED",              p12:52000,  p3:58000,  p4:63000  },
+  { id:"8",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 2 AP con 2 PUNTOS DE RED",             p12:60000,  p3:66000,  p4:70000  },
+  { id:"9",  cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 2 PUNTOS DE RED",                      p12:48000,  p3:55000,  p4:60000  },
+  { id:"10", cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 3 AP",                                 p12:54000,  p3:60000,  p4:65000  },
+  { id:"11", cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 3 AP con 1 PUNTO DE RED",              p12:56000,  p3:62000,  p4:68000  },
+  { id:"12", cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 3 AP con 2 PUNTOS DE RED",             p12:64000,  p3:72000,  p4:75000  },
+  { id:"13", cat:"single-duo", nombre:"HC SINGLE o DUO con ONT con 4 AP",                                 p12:56000,  p3:64000,  p4:70000  },
+  { id:"14", cat:"single-duo", nombre:"HC 
